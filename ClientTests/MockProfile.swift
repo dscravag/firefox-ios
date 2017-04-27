@@ -235,4 +235,7 @@ open class MockProfile: Profile {
     public func sendItems(_ items: [ShareItem], toClients clients: [RemoteClient]) -> Deferred<Maybe<SyncStatus>> {
         return deferMaybe(SyncStatus.notStarted(.offline))
     }
+
+    public func accountDidRemoteVerify() {
+    }
 }
