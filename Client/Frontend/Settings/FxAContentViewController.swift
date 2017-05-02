@@ -40,7 +40,7 @@ class FxAContentViewController: SettingsContentViewController, WKScriptMessageHa
     init(profile: Profile) {
         self.profile = profile
         super.init(backgroundColor: UIColor(red: 242 / 255.0, green: 242 / 255.0, blue: 242 / 255.0, alpha: 1.0), title: NSAttributedString(string: "Firefox Accounts"))
-        NotificationCenter.default.addObserver(self, selector: #selector(FxAContentViewController.SELdidVerify(_:)), name: NotificationFirefoxAccountChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(FxAContentViewController.SELdidVerify(_:)), name: NotificationFirefoxAccountVerified, object: nil)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -48,7 +48,7 @@ class FxAContentViewController: SettingsContentViewController, WKScriptMessageHa
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(self, name: NotificationFirefoxAccountChanged, object: nil)
+        NotificationCenter.default.removeObserver(self, name: NotificationFirefoxAccountVerified, object: nil)
     }
 
     override func viewDidLoad() {
@@ -123,18 +123,19 @@ class FxAContentViewController: SettingsContentViewController, WKScriptMessageHa
         helper.application(app, didReceiveAccountJSON: data)
     }
 
-    func SELdidVerify(_ notification: Notification) {
+    @objc fileprivate func SELdidVerify(_ notification: Notification) {
         guard let account = profile.getAccount() else {
             return
         }
-        guard let userInfo = notification.userInfo,
-            let accountVerified = userInfo[NotificationUserInfoKeyHasSyncableAccount] as? Bool,
-            accountVerified else {
-                return
-        }
+        // We can't verify against the actionNeeded of the account, 
+        // because of potential race conditions.
+        // However, we restrict visibility of this method, and make sure 
+        // we only Notify via the FxALoginStateMachine.
         let flags = FxALoginFlags(pushEnabled: account.pushRegistration != nil,
-                                  verified: accountVerified)
-        self.delegate?.contentViewControllerDidSignIn(self, withFlags: flags)
+                                  verified: true)
+        DispatchQueue.main.async {
+            self.delegate?.contentViewControllerDidSignIn(self, withFlags: flags)
+        }
     }
 
     // The content server page is ready to be shown.
