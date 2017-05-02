@@ -226,10 +226,9 @@ class FxALoginHelper {
         account.advance().upon { state in
             guard state.actionNeeded == .needsVerification else {
                 // Verification has occurred remotely, and we can proceed.
-                // If we're still on the same page, then we can tell the delegates 
-                // again that login has succeeded, but this time it's verification.
-                self.accountVerified = true
-                return self.loginDidSucceed()
+                // The state machine will have told any listening UIs that 
+                // we're done.
+                return
             }
 
             if account.pushRegistration != nil {

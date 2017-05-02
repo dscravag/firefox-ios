@@ -96,13 +96,8 @@ extension FxAPushMessageHandler {
         }
 
         // If we're verified remotely, we can start syncing.
-        let deferred = account.advance().bind { _ in return succeed() }
-
-        // We're not locally verified yet, but go ahead and tell everyone 
-        // we've heard we're verified remotely and that we're syncing now. 
-        profile.accountDidRemoteVerify()
-
-        return deferred
+        // The state machine will send a message to UIs listening
+        return account.advance().bind { _ in return succeed() }
     }
 }
 
