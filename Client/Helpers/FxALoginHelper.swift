@@ -165,7 +165,8 @@ class FxALoginHelper {
     }
 
     func getPushConfiguration() -> PushConfiguration? {
-        return ProductionPushConfiguration()
+        let label = PushConfigurationLabel(rawValue: AppConstants.scheme)
+        return label?.toConfiguration()
     }
 
     func apnsRegisterDidSucceed(_ deviceToken: Data) {
